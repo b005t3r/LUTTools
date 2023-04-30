@@ -1,5 +1,6 @@
 package luttools;
 
+import javax.swing.text.NumberFormatter;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Objects;
@@ -84,5 +85,41 @@ public final class Utils {
         }
 
         return result;
+    }
+
+    public static String createCubeLut(ColorMapping[][][] colorMap, int stepsPerChannel, String title) {
+        StringBuilder result = new StringBuilder();
+
+        result
+            .append("#Created with: https://github.com/b005t3r/LUTTools\n")
+            .append("TITLE \"lut\"\n")
+            .append("\n")
+            .append("#LUT size\n")
+            .append("LUT_3D_SIZE 32\n")
+            .append("\n")
+            .append("#data domain\n")
+            .append("DOMAIN_MIN 0.0 0.0 0.0\n")
+            .append("DOMAIN_MAX 1.0 1.0 1.0\n")
+            .append("\n")
+            .append("#LUT data points\n");
+
+        final int[] indexes = new int[stepsPerChannel];
+
+        for(int i = 0; i < indexes.length; ++i)
+            indexes[i] = Math.max(0, Math.min(Math.round(255.0f * i / (indexes.length - 1)), 255));
+
+        for(int b = 0; b < stepsPerChannel; ++b) {
+            for(int g = 0; g < stepsPerChannel; ++g) {
+                for(int r = 0; r < stepsPerChannel; ++r) {
+                    ColorMapping m = colorMap[indexes[r]][indexes[g]][indexes[b]];
+
+                    String line = String.format("%.6f %.6f %.6f\n", m.r / 255.0f, m.g / 255.0f, m.b / 255.0f);
+
+                    result.append(line);
+                }
+            }
+        }
+
+        return result.toString();
     }
 }
